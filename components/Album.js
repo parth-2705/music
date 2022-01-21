@@ -1,5 +1,5 @@
 import React, { Component} from 'react'
-import { StyleSheet, Text, View, Image, TextInput, Button, TouchableHighlight, Modal} from 'react-native';
+import { StyleSheet, Text, View, Image, TextInput, Button, TouchableHighlight, Modal, Linking } from 'react-native';
 import { Dimensions } from 'react-native';
 let helperArray = require('../data.json');
 const { useState, useEffect } = React;
@@ -13,6 +13,9 @@ constructor(props){
         allUsers: helperArray,
         usersFiltered: helperArray,
         open: false,
+        name: '',
+        img: '',
+        link: '',
     };
 }
 
@@ -21,6 +24,7 @@ constructor(props){
 
 
 searchUser = (textToSearch) => {
+    
     this.setState({
         usersFiltered:this.state.allUsers.filter( i =>
            i['im:name'].label.toLowerCase().includes(textToSearch.toLowerCase()),
@@ -49,11 +53,14 @@ closeModal = () => {
     this.setState({open:false});
 }
 
-openModal = (index) => {
+openModal = (item) => {
     this.setState({
         open:true,
+        name: item['im:name'].label,
+        img: item['im:image'][2].label,
+        link: item['link'].attributes.href,
     });
-    console.log(index);
+    console.log(item['im:name'].label);
 }
     render() {
         return (
@@ -74,18 +81,20 @@ openModal = (index) => {
                            <Text style={styles.textsm}> {item['im:artist'].label}</Text>
                            <Text style={styles.textsm}> {item['im:releaseDate'].attributes.label}</Text>
                            <Text style={styles.textg}> {item['im:price'].label}</Text>
-                           <TouchableHighlight onPress={index => {this.openModal(index)}}>
+                           <TouchableHighlight onPress={() => {this.openModal(item)}}>
                                 <Text style={styles.more}  >More...</Text>
                           </TouchableHighlight>
                           
                        </View>
                     </View>
                 ))}
-                <Modal animationType = {"slide"} transparent = {true} visible= {this.state.open}>
-               
+                <Modal animationType = {"slide"} transparent = {true} visible= {this.state.open} >
+              
                <View style = {styles.modal}>
-                  <Text style = {styles.modalc}>Modal is open!</Text>
-                  
+                   <Image style={styles.modalImg} source={{uri: this.state.img}} ></Image>
+                  <Text style = {styles.modalc}>{this.state.name}
+                  </Text>
+                  <Text style={{color: 'blue'}} onPress={() => Linking.openURL(this.state.link)}>Listen</Text>
                   <TouchableHighlight onPress={this.closeModal}>
                      
                      <Text style = {styles.modalc}>Close Modal</Text>
@@ -165,5 +174,10 @@ const styles = StyleSheet.create({
     modalc: {
         color: '#fff',
     },
+
+    modalImg: {
+         width: 300,
+         height: 300,
+    }
   });
   
